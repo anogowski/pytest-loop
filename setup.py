@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pytest-loop',
-      use_scm_version=True,
+      version="1.0.2",
       description='pytest plugin for looping tests',
       long_description=open('README.rst').read(),
       author='Adam Nogowski',

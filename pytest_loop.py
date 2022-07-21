@@ -29,7 +29,7 @@ def pytest_addoption(parser):
 	"""
 	Add our command line options.
 	"""
-	pytest_loop = parser.getgroup("pytest_loop")
+	pytest_loop = parser.getgroup("loop")
 	pytest_loop.addoption(
 		"--delay",
 		action="store",
