@@ -54,7 +54,7 @@ def test_ini_file(testdir):
 
     # fnmatch_lines does an assertion internally
     result.stdout.fnmatch_lines(
-        ["*::test_ini PASSED*", ]
+        ["*::test_ini - run* PASSED*", ] #TODO: Get [] to work
     )
 
     # Make sure that that we get a '0' exit code for the testsuite
