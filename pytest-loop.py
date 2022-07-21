@@ -64,16 +64,7 @@ def pytest_addoption(parser):
 		action='store',
 		default=1,
 		type=int,
-		help='Number of times to loop each test',
-	)
-
-	pytest_loop.addoption(
-		'--loop-scope',
-		action='store',
-		default='function',
-		type=str,
-		choices=('function', 'class', 'module', 'session'),
-		help='Scope for looping tests',
+		help='The number of times to loop each test',
 	)
 
 

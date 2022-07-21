@@ -1,48 +1,43 @@
 language: python
 matrix:
   include:
-  # On Python 2 we test pytest 3 (minimum supported) and 4 (latest to support Python 2)
-  - python: 2.7
-    env: TOXENV=py27-pytest3
-  - python: pypy
-    env: TOXENV=pypy-pytest3
-  - python: 2.7
-    env: TOXENV=py27-pytest4
-  - python: pypy
-    env: TOXENV=pypy-pytest4
-
-  # On Python 3.5+ we test pytest 3 (minimum supported) and 6 (latest)
-  - python: 3.5
-    env: TOXENV=py35-pytest3
-  - python: 3.5
-    env: TOXENV=py35-pytest6
-
-  - python: 3.6
-    env: TOXENV=py36-pytest3
+  
   - python: 3.6
     env: TOXENV=py36-pytest6
+  - python: 3.6
+    env: TOXENV=py36-pytest7
 
-  - python: 3.7
-    env: TOXENV=py37-pytest3
-  - python: 3.7
+ - python: 3.7
     env: TOXENV=py37-pytest6
+  - python: 3.7
+    env: TOXENV=py37-pytest7
 
-  - python: 3.8
-    env: TOXENV=py38-pytest3
   - python: 3.8
     env: TOXENV=py38-pytest6
+  - python: 3.8
+    env: TOXENV=py38-pytest7
 
-  - python: 3.9
-    env: TOXENV=py39-pytest3
   - python: 3.9
     env: TOXENV=py39-pytest6
+  - python: 3.9
+    env: TOXENV=py39-pytest7
 
-  - python: pypy3
-    env: TOXENV=pypy3-pytest3
+  - python: "3.10"
+    env: TOXENV=py310-pytest6
+  - python: "3.10"
+    env: TOXENV=py310-pytest7
+
+  - python: "3.11-dev"
+    env: TOXENV=py311-pytest6
+  - python: "3.11-dev"
+    env: TOXENV=py311-pytest7
+
   - python: pypy3
     env: TOXENV=pypy3-pytest6
+  - python: pypy3
+    env: TOXENV=pypy3-pytest7
 
-  - python: 3.9
+  - python: "3.10"
     env: TOXENV=flake8
 install:
 - pip install tox-travis

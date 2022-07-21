@@ -1,5 +1,9 @@
 Release Notes
 -------------
+**1.0.0 (2022-07-21)**
+
+* Python 3.5 is no longer officially supported.
+
 
 **0.9.1 (2020-10-31)**
 
