@@ -6,7 +6,7 @@ easy to loop a single test, or multiple tests, a specific number of times or for
 This plugin merges pytest-repeat and pytest-stress with a fix for test results.
 
 .. image:: https://img.shields.io/badge/license-MPL%202.0-blue.svg
-   :target: https://github.com/pytest-dev/pytest-loop/blob/master/LICENSE
+   :target: https://github.com/anogowski/pytest-loop/blob/master/LICENSE
    :alt: License
 .. image:: https://img.shields.io/pypi/v/pytest-loop.svg
    :target: https://pypi.python.org/pypi/pytest-loop/
@@ -14,14 +14,14 @@ This plugin merges pytest-repeat and pytest-stress with a fix for test results.
 .. image:: https://img.shields.io/pypi/pyversions/pytest-loop.svg
    :target: https://pypi.org/project/pytest-loop/
    :alt: Python versions
-.. image:: https://img.shields.io/travis/pytest-dev/pytest-loop.svg
-   :target: https://travis-ci.org/pytest-dev/pytest-loop/
+.. image:: https://img.shields.io/travis/anogowski/pytest-loop.svg
+   :target: https://travis-ci.org/anogowski/pytest-loop/
    :alt: Travis
-.. image:: https://img.shields.io/github/issues-raw/pytest-dev/pytest-loop.svg
-   :target: https://github.com/pytest-dev/pytest-loop/issues
+.. image:: https://img.shields.io/github/issues-raw/anogowski/pytest-loop.svg
+   :target: https://github.com/anogowski/pytest-loop/issues
    :alt: Issues
-.. image:: https://img.shields.io/requires/github/pytest-dev/pytest-loop.svg
-   :target: https://requires.io/github/pytest-dev/pytest-loop/requirements/?branch=master
+.. image:: https://img.shields.io/requires/github/anogowski/pytest-loop.svg
+   :target: https://requires.io/github/anogowski/pytest-loop/requirements/?branch=master
    :alt: Requirements
 
 Requirements
@@ -82,6 +82,6 @@ occurs.
 Resources
 ---------
 
-- `Release Notes <https://github.com/pytest-dev/pytest-loop/blob/master/CHANGES.rst>`_
-- `Issue Tracker <https://github.com/pytest-dev/pytest-loop/issues>`_
-- `Code <https://github.com/pytest-dev/pytest-loop/>`_
+- `Release Notes <https://github.com/anogowski/pytest-loop/blob/master/CHANGES.rst>`_
+- `Issue Tracker <https://github.com/anogowski/pytest-loop/issues>`_
+- `Code <https://github.com/anogowski/pytest-loop/>`_

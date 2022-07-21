@@ -51,6 +51,6 @@ deploy:
   distributions: sdist bdist_wheel
   on:
     tags: true
-    repo: pytest-dev/pytest-repeat
-    python: 3.8
-    condition: "$TOXENV = py38-pytest6"
+    repo: anogowski/pytest-loop
+    python: 3.6
+    condition: "$TOXENV = py36-pytest6"
