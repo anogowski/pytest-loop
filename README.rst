@@ -14,9 +14,9 @@ This plugin merges pytest-repeat and pytest-stress with a fix for test results.
 .. image:: https://img.shields.io/pypi/pyversions/pytest-loop.svg
    :target: https://pypi.org/project/pytest-loop/
    :alt: Python versions
-.. image:: https://img.shields.io/travis/anogowski/pytest-loop.svg
-   :target: https://travis-ci.org/anogowski/pytest-loop/
-   :alt: Travis
+.. image:: https://github.com/anogowski/pytest-loop/actions/workflows/test.yml/badge.svg
+    :target: https://github.com/anogowski/pytest-cov/actions
+    :alt: See Build Status on GitHub Actions
 .. image:: https://img.shields.io/github/issues-raw/anogowski/pytest-loop.svg
    :target: https://github.com/anogowski/pytest-loop/issues
    :alt: Issues
@@ -28,8 +28,10 @@ Requirements
 ------------
 
 You will need the following prerequisites in order to use pytest-loop:
-
+- Python 3.6+ or PyPy
 - pytest 6 or newer
+
+Only tested with Pytest version 6.2.5 and 7.0.1.
 
 Installation
 ------------

@@ -13,7 +13,7 @@ setup(name='pytest-loop',
       install_requires=['pytest>=6'],
       license='Mozilla Public License 2.0 (MPL 2.0)',
       keywords='pytest pytest loop',
-      python_requires='>=3.6.8',
+      python_requires='>=3.6',
       classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Framework :: Pytest',
