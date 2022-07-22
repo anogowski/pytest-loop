@@ -1,5 +1,5 @@
-#pytest-loop
-
+pytest-loop
+===========
 
 pytest-loop is a plugin for `pytest <https://docs.pytest.org>`_ that makes it
 easy to loop a single test, or multiple tests, a specific number of times or for a certain duration of time.
@@ -24,8 +24,8 @@ This plugin merges pytest-repeat and pytest-stress with a fix for test results.
    :target: https://requires.io/github/anogowski/pytest-loop/requirements/?branch=master
    :alt: Requirements
 
-##Requirements
-
+Requirements
+------------
 
 You will need the following prerequisites in order to use pytest-loop:
 - Python 3.6+ or PyPy
@@ -33,7 +33,8 @@ You will need the following prerequisites in order to use pytest-loop:
 
 Only tested with Pytest version 6.2.5 and 7.0.1.
 
-##Installation
+Installation
+------------
 
 To install pytest-loop:
 
@@ -41,10 +42,11 @@ To install pytest-loop:
 
   $ pip install pytest-loop
 
-##Usage
+Usage
+-----
 
-###Iterative Loop:
-
+Iterative Loop:
+^^^^^^^^^^^^^^^
 Use the :code:`--loop` command line option to specify how many times you want
 your test, or tests, to be run:
 
@@ -68,7 +70,8 @@ can use the :code:`@pytest.mark.loop(n)` decorator:
 
 
 
-###Time based loop:
+Time based loop:
+^^^^^^^^^^^^^^^^
 
 Loop tests for 30 seconds::
 
@@ -98,7 +101,8 @@ You can also add these values to config files::
 Note: These loop times include setup and teardown operations as well. So if you have a test setup that takes 5
 seconds, your actual tests will run for 5 seconds less than your desired time.
 
-###looping a test until failure
+looping a test until failure:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are trying to diagnose an intermittent failure, it can be useful to run the same
 test over and over again until it fails. You can use pytest's :code:`-x` option in
@@ -119,8 +123,8 @@ occurs.
 This will attempt to run test_file.py for 10 hours, but will stop as soon as a failure
 occurs.
 
-##Resources
-
+Resources
+---------
 
 - `Release Notes <https://github.com/anogowski/pytest-loop/blob/master/CHANGES.rst>`_
 - `Issue Tracker <https://github.com/anogowski/pytest-loop/issues>`_
