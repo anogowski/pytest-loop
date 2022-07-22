@@ -9,7 +9,7 @@ name = "pypi"
 cookiecutter = "*"
 tox = "*"
 flake8 = "*"
-pytest = "==6.2.5"
+pytest = "*"
 
 [requires]
 python_version = "3.6"
