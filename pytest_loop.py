@@ -98,7 +98,7 @@ def pytest_runtestloop(session: "Session") -> bool:
 			item : pytest.Item = item
 			item._report_sections.clear() #clear reports for new test
 			
-			pattern = " - run\[\d\]"
+			pattern = " - run\[\d+\]"
 			if re.search(pattern, item._nodeid):
 				new_str = f" - run[{count}]"
 				item._nodeid = re.sub(pattern, new_str, item._nodeid)
