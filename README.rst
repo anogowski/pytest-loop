@@ -41,8 +41,10 @@ To install pytest-loop:
 
   $ pip install pytest-loop
 
-looping a test
+Usage
 ----------------
+
+Iterative Loop:
 
 Use the :code:`--loop` command line option to specify how many times you want
 your test, or tests, to be run:
@@ -79,6 +81,37 @@ For example:
 
 This will attempt to run test_file.py 1000 times, but will stop as soon as a failure
 occurs.
+
+
+Time based loop:
+
+Loop tests for 30 seconds::
+
+    $ pytest --seconds 30
+
+Loop tests for 45 minutes::
+
+    $ pytest --minutes 45
+
+Loop tests for 8 hours::
+
+    $ pytest --hours 8
+
+Loop tests for 1 hour 8 minutes and 9 seconds::
+
+    $ pytest --hours 1 --minutes 8 --seconds 9
+
+Need to wait some time after each test loop?::
+
+    $ pytest --delay 5 --hours 4 --minutes 30
+
+You can also add these values to config files::
+
+    [pytest]
+    addopts = --hours 1 --minutes 30
+
+Note: These loop times include setup and teardown operations as well. So if you have a test setup that takes 5
+seconds, your actual tests will run for 5 seconds less than your desired time.
 
 
 Resources
