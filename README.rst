@@ -28,10 +28,8 @@ Requirements
 ------------
 
 You will need the following prerequisites in order to use pytest-loop:
-- Python 3.6+ or PyPy
+- Python 3.7+ or PyPy
 - pytest 6 or newer
-
-Only tested with Pytest version 6.2.5 and 7.0.1.
 
 Installation
 ------------
@@ -122,6 +120,12 @@ occurs.
 
 This will attempt to run test_file.py for 10 hours, but will stop as soon as a failure
 occurs.
+
+UnitTest Style Tests
+--------------------
+
+Unfortunately pytest-loop is not able to work with unittest.TestCase test classes.
+These tests will simply always run once, regardless of :code:`--loop`, and show a warning.
 
 Resources
 ---------

@@ -31,7 +31,7 @@ def test_ini_file(testdir):
     testdir.makeini(
         """
         [pytest]
-        addopts = --delay=0 --hours=0 --minutes=0 --seconds=0 --loop=0
+        addopts = --delay=0 --hours=0 --minutes=0 --seconds=0 --loop=2
     """
     )
 

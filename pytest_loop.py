@@ -9,6 +9,7 @@ import re
 from pluggy import HookspecMarker
 from _pytest.main import Session
 from _pytest.config import Config
+from _pytest.logging import LogCaptureFixture
 
 
 SECONDS_IN_HOUR : float = 3600
@@ -23,7 +24,6 @@ def pytest_configure(config : Config):
 	config.addinivalue_line(
 		'markers',
 		'loop(n): run the given test function `n` times.')
-
 
 def pytest_addoption(parser):
 	"""
@@ -69,7 +69,7 @@ def pytest_addoption(parser):
 
 
 @hookspec(firstresult=True)
-def pytest_runtestloop(session: "Session") -> bool:
+def pytest_runtestloop(session: Session) -> bool:
 	"""
 	Reimplement the test loop but loop for the user defined amount of time or iterations.
 	"""
@@ -89,21 +89,23 @@ def pytest_runtestloop(session: "Session") -> bool:
 
 	if m is not None:
 		iterations = int(m.args[0])
+		
 
-	while True: # need to run at least one for normal tests
+	while count <= iterations: # Need to run atleast once
 		count += 1
 		if _get_total_time(session) or count <= iterations:
-			_print_loop_count(count)
+			_print_loop_count(count, iterations,)
+		
 		for index, item in enumerate(session.items):
 			item : pytest.Item = item
 			item._report_sections.clear() #clear reports for new test
-			
-			pattern = " - run\[\d+\]"
-			if re.search(pattern, item._nodeid):
-				new_str = f" - run[{count}]"
-				item._nodeid = re.sub(pattern, new_str, item._nodeid)
-			else:
-				item._nodeid = item._nodeid + f" - run[{count}]"
+			if iterations > 1:
+				pattern = " - run\[\d+\]"
+				if re.search(pattern, item._nodeid):
+					new_str = f" - run[{count}]"
+					item._nodeid = re.sub(pattern, new_str, item._nodeid)
+				else:
+					item._nodeid = item._nodeid + f" - run[{count}]"
 
 			next_item : pytest.Item = session.items[index + 1] if index + 1 < len(session.items) else None
 			item.config.hook.pytest_runtest_protocol(item=item, nextitem=next_item)
@@ -152,7 +154,7 @@ def _timed_out(session : Session, start_time : float) -> bool:
 	"""
 	return time.time() - start_time > _get_total_time(session)
 
-def _print_loop_count(count : int):
+def _print_loop_count(count : int, iterations: int):
 	"""
 	Helper function to simply print out what loop number we're on.
 
@@ -161,4 +163,5 @@ def _print_loop_count(count : int):
 	"""
 	column_length = shutil.get_terminal_size().columns
 	print("\n")
-	print(" Loop # {} ".format(count).center(column_length, "="))
+	print(f" Loop # {count}/{iterations} ".center(column_length, "="))
+	print("\n")
