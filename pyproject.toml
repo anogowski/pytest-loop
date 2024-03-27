@@ -28,9 +28,7 @@ readme = {file = "README.rst", content-type = "text/x-rst"}
 license = {file = "LICENSE"}
 keywords = ["pytest", "loop", "repeat", "rerun", "stress", "pytest-loop"]
 requires-python = ">=3.8"
-packages = [
-    {include = "pytest_loop",from="src"}
-]
+py_modules = [ "src/pytest_loop" ]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Framework :: Pytest",
