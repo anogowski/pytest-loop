@@ -1,9 +1,20 @@
 [build-system]
-requires = ["hatchling", "hatch-vcs"]
+requires = ["hatchling", "versioningit"]
 build-backend = "hatchling.build"
 
+[tool.versioningit.vcs]
+# The method key:
+method = "git"  # <- The method name
+
+# Parameters to pass to the method:
+match = ["v*"]
+default-tag = "1.0.0"
+
+[tool.versioningit.next-version]
+method = "smallest"
+
 [tool.hatch.version]
-source = "vcs"
+source = "versioningit"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pytest-loop"]
