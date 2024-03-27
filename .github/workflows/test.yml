@@ -3,11 +3,10 @@ name: test
 on:
   push:
     branches:
-      - main
-      - "test-me-*"
+      - master
+      - "dev_test*"
 
   pull_request:
-
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,7 +22,6 @@ jobs:
         uses: hynek/build-and-inspect-python-package@v2
 
   test:
-
     needs: [package]
 
     runs-on: ${{ matrix.os }}
