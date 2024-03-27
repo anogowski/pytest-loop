@@ -9,53 +9,160 @@ pytest_plugins = "pytester",
 
 class TestLoop:
 
-   pytest_plugins = ("pytester",)
+    def test_no_loop(self, testdir):
+        testdir.makepyfile("""
+            def test_no_loop(request):
+                fixtures = request.fixturenames
+                assert "__pytest_loop_step_number" not in fixtures
+        """)
+        result = testdir.runpytest('-v', '--loop', '1')
+        result.stdout.fnmatch_lines([
+            '*test_no_loop.py::test_no_loop PASSED*',
+            '*1 passed*',
+        ])
+        assert result.ret == 0
 
+    def test_can_loop(self, testdir):
+        testdir.makepyfile("""
+            def test_loop():
+                pass
+        """)
+        result = testdir.runpytest('--loop', '2')
+        result.stdout.fnmatch_lines(['*2 passed*'])
+        assert result.ret == 0
 
-def test_help_message(testdir):
-    result = testdir.runpytest("--help")
-    # fnmatch_lines does an assertion internally
-    result.stdout.fnmatch_lines(
-        [
-            "loop:",
-            "*--delay=DELAY*The amount of time to wait between each test loop.",
-            "*--hours=HOURS*The number of hours to loop the tests for.",
-            "*--minutes=MINUTES*The number of minutes to loop the tests for.",
-            "*--seconds=SECONDS*The number of seconds to loop the tests for.",
-            "*--loop=*The number of times to loop each test"
-        ]
-    )
+    def test_mark_loop_decorator_is_registered(self, testdir):
+        result = testdir.runpytest('--markers')
+        result.stdout.fnmatch_lines([
+            '@pytest.mark.loop(n): run the given test function `n` times.'])
+        assert result.ret == 0
 
+    def test_mark_loop_decorator(self, testdir):
+        testdir.makepyfile("""
+            import pytest
+            @pytest.mark.loop(3)
+            def test_mark_loop_decorator():
+                pass
+        """)
+        result = testdir.runpytest()
+        result.stdout.fnmatch_lines(['*3 passed*'])
+        assert result.ret == 0
 
-def test_ini_file(testdir):
-    testdir.makeini(
+    def test_mark_loop_decorator_loop_once(self, testdir):
+        testdir.makepyfile("""
+            import pytest
+            @pytest.mark.loop(1)
+            def test_mark_loop_decorator_loop_once():
+                pass
+        """)
+        result = testdir.runpytest('--loop', '10')
+        result.stdout.fnmatch_lines(['*1 passed*'])
+        assert result.ret == 0
+
+    def test_parametrize(self, testdir):
+        testdir.makepyfile("""
+            import pytest
+            @pytest.mark.parametrize('x', ['a', 'b', 'c'])
+            def test_loop(x):
+                pass
+        """)
+        result = testdir.runpytest('-v', '--loop', '2')
+        result.stdout.fnmatch_lines([
+            '*test_parametrize.py::test_loop - run[1]  PASSED*',
+            '*test_parametrize.py::test_loop - run[2]  PASSED*',
+            '*test_parametrize.py::test_loop - run[3]  PASSED*',
+            '*test_parametrize.py::test_loop - run[4]  PASSED*',
+            '*test_parametrize.py::test_loop - run[5]  PASSED*',
+            '*test_parametrize.py::test_loop - run[6]  PASSED*',
+            '*6 passed*',
+        ])
+        assert result.ret == 0
+
+    def test_parametrized_fixture(self, testdir):
+        testdir.makepyfile("""
+            import pytest
+            @pytest.fixture(params=['a', 'b', 'c'])
+            def parametrized_fixture(request):
+                return request.param
+
+            def test_loop(parametrized_fixture):
+                pass
+        """)
+        result = testdir.runpytest('--loop', '2')
+        result.stdout.fnmatch_lines(['*6 passed*'])
+        assert result.ret == 0
+
+    def test_step_number(self, testdir):
+        testdir.makepyfile("""
+            import pytest
+            expected_steps = iter(range(5))
+            def test_loop(__pytest_loop_step_number):
+                assert next(expected_steps) == __pytest_loop_step_number
+                if __pytest_loop_step_number == 4:
+                    assert not list(expected_steps)
+        """)
+        result = testdir.runpytest('-v', '--loop', '5')
+        result.stdout.fnmatch_lines([
+            '*test_step_number.py::test_loop - run[1] PASSED*',
+            '*test_step_number.py::test_loop - run[2] PASSED*',
+            '*test_step_number.py::test_loop - run[3] PASSED*',
+            '*test_step_number.py::test_loop - run[4] PASSED*',
+            '*test_step_number.py::test_loop - run[5] PASSED*',
+            '*5 passed*',
+        ])
+        assert result.ret == 0
+
+    def test_invalid_option(self, testdir):
+        testdir.makepyfile("""
+            def test_loop():
+                pass
+        """)
+        result = testdir.runpytest('--loop', 'a')
+        assert result.ret == 4
+
+    def test_unittest_test(self, testdir):
+        testdir.makepyfile("""
+            from unittest import TestCase
+
+            class ClassStyleTest(TestCase):
+                def test_this(self):
+                    assert 1
+        """)
+        result = testdir.runpytest('-v', '--loop', '2')
+        result.stdout.fnmatch_lines([
+            '*test_unittest_test.py::ClassStyleTest::test_this PASSED*',
+            '*1 passed*',
+        ])
+
+    def test_ini_file(self, testdir):
+        testdir.makeini(
+            """
+            [pytest]
+            addopts = --delay=0 --hours=0 --minutes=0 --seconds=0 --loop=2
         """
-        [pytest]
-        addopts = --delay=0 --hours=0 --minutes=0 --seconds=0 --loop=2
-    """
-    )
+        )
 
-    testdir.makepyfile(
+        testdir.makepyfile(
+            """
+            import pytest
+            @pytest.fixture
+            def addopts(request):
+                return request.config.getini('addopts')
+            def test_ini(addopts):
+                assert addopts[0] == "--delay=0"
+                assert addopts[1] == "--hours=0"
+                assert addopts[2] == "--minutes=0"
+                assert addopts[3] == "--seconds=0"
+                assert addopts[4] == "--loop=0"
         """
-        import pytest
-        @pytest.fixture
-        def addopts(request):
-            return request.config.getini('addopts')
-        def test_ini(addopts):
-            assert addopts[0] == "--delay=0"
-            assert addopts[1] == "--hours=0"
-            assert addopts[2] == "--minutes=0"
-            assert addopts[3] == "--seconds=0"
-            assert addopts[4] == "--loop=0"
-    """
-    )
+        )
 
-    result = testdir.runpytest("-v")
+        result = testdir.runpytest("-v")
 
-    # fnmatch_lines does an assertion internally
-    result.stdout.fnmatch_lines(
-        ["*::test_ini - run* PASSED*", ] #TODO: Get [] to work
-    )
+        # fnmatch_lines does an assertion internally
+        result.stdout.fnmatch_lines(
+            ["*::test_ini - run* PASSED*", ] #TODO: Get [] to work
+        )
 
-    # Make sure that that we get a '0' exit code for the testsuite
-    assert result.ret == 0
+        # Make sure that that we get a '0' exit code for the testsuite
+        assert result.ret == 0
