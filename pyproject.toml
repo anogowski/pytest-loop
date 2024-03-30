@@ -10,6 +10,12 @@ method = "git" # <- The method name
 match = ["v*"]
 default-tag = "1.0.0"
 
+
+[tool.versioningit.format]
+distance = "{version}.dev{distance}"
+dirty = "{version}+dirty"
+distance-dirty = "{version}.dev{distance}+dirty"
+
 [tool.versioningit.next-version]
 method = "smallest"
 
@@ -65,3 +71,7 @@ loop = "pytest_loop"
 builtin = "clear,usage,en-GB_to_en-US"
 write-changes = true
 count = true
+
+[tool.pytest.ini_options]
+log_file = "log.log"
+log_file_level = "DEBUG"

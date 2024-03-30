@@ -16,7 +16,7 @@ import pytest
 from pluggy import HookspecMarker
 from _pytest.main import Session
 from _pytest.config import Config
-from pytest import FixtureRequest
+from pytest import FixtureRequest, fixture
 
 SECONDS_IN_HOUR: float = 3600
 SECONDS_IN_MINUTE: float = 60
@@ -84,156 +84,142 @@ def pytest_addoption(parser):
 	)
 
 
+@pytest.mark.trylast
 def pytest_configure(config: Config):
 	config.addinivalue_line('markers', 'loop(n): run the given test function `n` times.')
+	config.pluginmanager.register(PyTest_Loop(config), PyTest_Loop.name)
 
 
-@hookspec(firstresult=True)
-def pytest_runtestloop(session: Session) -> bool:
-	"""
-	Reimplement the test loop but loop for the user defined amount of time or iterations.
-	"""
-	if session.testsfailed and not session.config.option.continue_on_collection_errors:
-		raise session.Interrupted("%d error%s during collection" % (session.testsfailed, "s" if session.testsfailed != 1 else ""))
+class PyTest_Loop:
+	name = 'pytest-loop'
 
-	if session.config.option.collectonly:
+	def __init__(self, config: Config):
+		# turn debug prints on only if "-vv" or more passed
+		level = logging.DEBUG if config.option.verbose > 1 else logging.INFO
+		logging.basicConfig(level=level)
+		self.logger = logging.getLogger(self.name)
+
+	@hookspec(firstresult=True)
+	def pytest_runtestloop(self, session: Session) -> bool:
+		"""
+		Reimplement the test loop but loop for the user defined amount of time or iterations.
+		"""
+		if session.testsfailed and not session.config.option.continue_on_collection_errors:
+			raise session.Interrupted("%d error%s during collection" % (session.testsfailed, "s" if session.testsfailed != 1 else ""))
+
+		if session.config.option.collectonly:
+			return True
+
+		start_time: float = time.time()
+		total_time: float = 0
+
+		count: int = 0
+
+		while total_time >= SHORTEST_AMOUNT_OF_TIME:  # need to run at least one for normal tests
+			count += 1
+			total_time = self._get_total_time(session)
+
+			for index, item in enumerate(session.items):
+				item: pytest.Item = item
+				item._report_sections.clear()  #clear reports for new test
+
+				if total_time > SHORTEST_AMOUNT_OF_TIME:
+					self._print_loop_count(count)
+					item._nodeid = self._set_nodeid(item._nodeid, count)
+
+				next_item: pytest.Item = session.items[index + 1] if index + 1 < len(session.items) else None
+				item.config.hook.pytest_runtest_protocol(item=item, nextitem=next_item)
+				if session.shouldfail:
+					raise session.Failed(session.shouldfail)
+				if session.shouldstop:
+					raise session.Interrupted(session.shouldstop)
+			if self._timed_out(session, start_time):
+				break  # exit loop
+			time.sleep(self._get_delay_time(session))
+		self.logger.debug("end test loop")
 		return True
 
-	start_time: float = time.time()
-	total_time: float = 0
+	def _set_nodeid(self, nodeid: str, count: int) -> str:
+		pattern = "\[ \d+ \]"
+		run_str = f"[ {count} ]"
+		if re.search(pattern, nodeid):
+			nodeid = re.sub(pattern, run_str, nodeid)
+		else:
+			nodeid = nodeid + run_str
+		return nodeid
 
-	# iterations = session.config.option.loop
-	# m = session.get_closest_marker('loop')
+	def _get_delay_time(self, session: Session) -> float:
+		"""
+		Helper function to extract the delay time from the session.
 
-	marker = session.get_closest_marker('loop')
-	iterations = marker and marker.args[0] or session.config.option.loop
+		:param session: Pytest session object.
+		:return: Returns the delay time for each test loop.
+		"""
+		return session.config.option.delay
 
-	# if m is not None:
-	# 	iterations = int(m.args[0])
-	# 	for arg, index in m.args:
-	# 		logging.debug(f"{index}: {arg}")
-	# 		print(f"{index}: {arg}")
+	def _get_total_time(self, session: Session) -> float:
+		"""
+		Takes all the user available time options, adds them and returns it in seconds.
 
-	count: int = 0
+		:param session: Pytest session object.
+		:return: Returns total amount of time in seconds.
+		"""
+		hours_in_seconds = session.config.option.hours * SECONDS_IN_HOUR
+		minutes_in_seconds = session.config.option.minutes * SECONDS_IN_MINUTE
+		seconds = session.config.option.seconds
+		total_time = hours_in_seconds + minutes_in_seconds + seconds
+		if total_time < SHORTEST_AMOUNT_OF_TIME:
+			raise InvalidTimeParameterError("Total time cannot be less than: {}!".format(SHORTEST_AMOUNT_OF_TIME))
+		return total_time
 
-	while total_time >= SHORTEST_AMOUNT_OF_TIME or count <= iterations:  # need to run at least one for normal tests
-		count += 1
-		total_time = _get_total_time(session)
+	def _timed_out(self, session: Session, start_time: float) -> bool:
+		"""
+		Helper function to check if the user specified amount of time has lapsed.
 
-		_print_loop_count(count, iterations)
-		for index, item in enumerate(session.items):
-			item: pytest.Item = item
-			item._report_sections.clear()  #clear reports for new test
+		:param session: Pytest session object.
+		:return: Returns True if the timeout has expired, False otherwise.
+		"""
+		return time.time() - start_time > self._get_total_time(session)
 
-			if total_time > SHORTEST_AMOUNT_OF_TIME:
-				pattern = " - run\[\d+\]"
-				run_str: str = f" - run[{count}]"
-				item._nodeid = _set_nodeid(item._nodeid, pattern, run_str)
+	def _print_loop_count(self, count: int):
+		"""
+		Helper function to simply print out what loop number we're on.
 
-			elif count < iterations:
-				pattern = " - run\[\d+ \/ \d+\]"
-				run_str: str = f" - run[{count} / {iterations}]"
-				item._nodeid = _set_nodeid(item._nodeid, pattern, run_str)
-
-			next_item: pytest.Item = session.items[index + 1] if index + 1 < len(session.items) else None
-			item.config.hook.pytest_runtest_protocol(item=item, nextitem=next_item)
-			if session.shouldfail:
-				raise session.Failed(session.shouldfail)
-			if session.shouldstop:
-				raise session.Interrupted(session.shouldstop)
-		if _timed_out(session, start_time) and count >= iterations:
-			break  # exit loop
-		time.sleep(_get_delay_time(session))
-	return True
-
-
-def _set_nodeid(nodeid: str, pattern: str, run_str: str) -> str:
-	if re.search(pattern, nodeid):
-		nodeid = re.sub(pattern, run_str, nodeid)
-	else:
-		nodeid = nodeid + run_str
-	return nodeid
-
-
-def _get_delay_time(session: Session) -> float:
-	"""
-	Helper function to extract the delay time from the session.
-
-	:param session: Pytest session object.
-	:return: Returns the delay time for each test loop.
-	"""
-	return session.config.option.delay
-
-
-def _get_total_time(session: Session) -> float:
-	"""
-	Takes all the user available time options, adds them and returns it in seconds.
-
-	:param session: Pytest session object.
-	:return: Returns total amount of time in seconds.
-	"""
-	hours_in_seconds = session.config.option.hours * SECONDS_IN_HOUR
-	minutes_in_seconds = session.config.option.minutes * SECONDS_IN_MINUTE
-	seconds = session.config.option.seconds
-	total_time = hours_in_seconds + minutes_in_seconds + seconds
-	if total_time < SHORTEST_AMOUNT_OF_TIME:
-		raise InvalidTimeParameterError("Total time cannot be less than: {}!".format(SHORTEST_AMOUNT_OF_TIME))
-	return total_time
-
-
-def _timed_out(session: Session, start_time: float) -> bool:
-	"""
-	Helper function to check if the user specified amount of time has lapsed.
-
-	:param session: Pytest session object.
-	:return: Returns True if the timeout has expired, False otherwise.
-	"""
-	return time.time() - start_time > _get_total_time(session)
-
-
-def _print_loop_count(count: int, iterations: int):
-	"""
-	Helper function to simply print out what loop number we're on.
-
-	:param count: The number to print.
-	:return: None.
-	"""
-	column_length = shutil.get_terminal_size().columns
-	print("\n")
-	if iterations > 1:
-		print(f" Loop # {count}/{iterations} ".center(column_length, "="))
-	else:
+		:param count: The number to print.
+		:return: None.
+		"""
+		column_length = shutil.get_terminal_size().columns
+		print("\n")
 		print(f" Loop # {count} ".center(column_length, "="))
-	print("\n")
+		print("\n")
 
+	@pytest.fixture()
+	def __pytest_loop_step_number(self, request: FixtureRequest):
+		marker = request.node.get_closest_marker("loop")
+		count = marker and marker.args[0] or request.config.option.loop
+		if count > 1:
+			try:
+				return request.param
+			except AttributeError:
+				if issubclass(request.cls, TestCase):
+					warnings.warn("Repeating unittest class tests not supported")
+				else:
+					raise UnexpectedError("This call couldn't work with pytest-loop. "
+					                      "Please consider raising an issue with your usage.")
 
-@pytest.fixture()
-def __pytest_loop_step_number(request: FixtureRequest):
-	marker = request.node.get_closest_marker("loop")
-	count = marker and marker.args[0] or request.config.option.loop
-	if count > 1:
-		try:
-			return request.param
-		except AttributeError:
-			if issubclass(request.cls, TestCase):
-				warnings.warn("Repeating unittest class tests not supported")
-			else:
-				raise UnexpectedError("This call couldn't work with pytest-loop. "
-				                      "Please consider raising an issue with your usage.")
+	@pytest.hookimpl(trylast=True)
+	def pytest_generate_tests(self, metafunc):
+		self.logger.debug("start pytest_generate_tests")
+		count = metafunc.config.option.loop
+		m = metafunc.definition.get_closest_marker('loop')
 
+		if m is not None:
+			count = int(m.args[0])
+		if count > 1:
+			metafunc.fixturenames.append("__pytest_loop_step_number")
 
-@pytest.hookimpl(trylast=True)
-def pytest_generate_tests(metafunc):
-	count = metafunc.config.option.loop
-	m = metafunc.definition.get_closest_marker('loop')
+			def make_progress_id(i, n=count) -> str:
+				return f' {i+1} / {n} '
 
-	if m is not None:
-		count = int(m.args[0])
-	if count > 1:
-		metafunc.fixturenames.append("__pytest_loop_step_number")
-
-		def make_progress_id(i, n=count) -> str:
-			return f' {i+1} / {n} '
-
-		scope = metafunc.config.option.loop_scope
-		metafunc.parametrize('__pytest_loop_step_number', range(count), indirect=True, ids=make_progress_id, scope=scope)
+			scope = metafunc.config.option.loop_scope
+			metafunc.parametrize('__pytest_loop_step_number', range(count), indirect=True, ids=make_progress_id, scope=scope)
