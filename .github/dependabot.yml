@@ -7,4 +7,19 @@ updates:
       patterns:
         - "*"  # Group all Actions updates into a single larger pull request
   schedule:
-    interval: weekly
+    interval: "daily"
+ 
+- package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+- package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      
+- package-ecosystem: "pip-compile"
+    directory: "/"
+    schedule:
+      interval: "daily"
