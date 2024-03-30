@@ -84,11 +84,20 @@ def pytest_addoption(parser):
 	)
 
 
+@pytest.mark.trylast
 def pytest_configure(config: Config):
 	config.addinivalue_line('markers', 'loop(n): run the given test function `n` times.')
+	config.pluginmanager.register(PyTest_Loop(config), PyTest_Loop.name)
 
 
 class PyTest_Loop:
+	name = 'pytest-loop'
+
+	def __init__(self, config: Config):
+		# turn debug prints on only if "-vv" or more passed
+		level = logging.DEBUG if config.option.verbose > 1 else logging.INFO
+		logging.basicConfig(level=level)
+		self.logger = logging.getLogger(self.name)
 
 	@hookspec(firstresult=True)
 	def pytest_runtestloop(self, session: Session) -> bool:
