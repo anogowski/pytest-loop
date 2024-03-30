@@ -17,7 +17,7 @@ method = "smallest"
 source = "versioningit"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/pytest-loop"]
+packages = ["src"]
 
 [project]
 name = "pytest-loop"

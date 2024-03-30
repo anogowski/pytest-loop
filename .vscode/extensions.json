@@ -1,0 +1,15 @@
+{
+	"recommendations": [
+		"eamodio.gitlens",
+		"eeyore.yapf",
+		"ms-python.debugpy",
+		"ms-python.isort",
+		"ms-python.python",
+		"ms-python.vscode-pylance",
+		"streetsidesoftware.code-spell-checker",
+		"tamasfe.even-better-toml",
+		"VisualStudioExptTeam.intellicode-api-usage-examples",
+		"VisualStudioExptTeam.vscodeintellicode-completions",
+		"VisualStudioExptTeam.vscodeintellicode",
+	]
+}

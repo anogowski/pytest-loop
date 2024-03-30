@@ -1,4 +1,40 @@
 {
-    "python.analysis.typeCheckingMode": "basic",
-    "python.analysis.autoImportCompletions": true
+	"python.analysis.typeCheckingMode": "basic",
+	"python.analysis.autoImportCompletions": true,
+	"files.encoding": "utf8", //Enforce UTF8 encoding
+	"files.eol": "\n",
+	"files.trimFinalNewlines": true, //Remove extra white space and end of file on save
+	"files.defaultLanguage": "python", //Assume new files are python
+	"git.autofetch": "all", //Commits will automatically be fetched from ALL remotes of the current Git repository.
+	"html.format.wrapLineLength": 300,
+	"workbench.layoutControl.enabled": true,
+	"workbench.layoutControl.type": "toggles",
+	"workbench.startupEditor": "none",
+	"workbench.editor.highlightModifiedTabs": true, //Highlight file tabs for unsaved files
+	"workbench.tree.indent": 25, //Indent folder hierarchy
+	"workbench.colorCustomizations": {
+		"tree.indentGuidesStroke": "#00ff00", //Add Green line when hovering over folder hierarchy
+		"editorUnnecessaryCode.border": "#dd7aab" //Underline unused code
+	},
+	"editor.guides.bracketPairs": "active", //Enable Bracket paring
+	"editor.bracketPairColorization.enabled": true, //Cycle through colors for different brackets
+	"editor.guides.highlightActiveBracketPair": true, //Highlight bracket pairs
+	"editor.detectIndentation": false, //False: Manually set tab size
+	"editor.tabSize": 4, //Tabs are 4 spaces
+	"editor.insertSpaces": false, //False: Use Tabs instead of spaces
+	"editor.wordWrap": "on", //Enforce text wrapping on next line in editor
+	"editor.find.autoFindInSelection": "multiline", //Search Selected text when multiple lines are selected
+	"editor.formatOnPaste": true, //Format Pasted content
+	"editor.formatOnSave": true, //Format on Save
+	"editor.showUnused": true,
+	"search.followSymlinks": false, //False: Do NOT show symlinks multiple times in search results
+	"[python]": {
+		"editor.formatOnSaveMode": "file",
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "eeyore.yapf"
+	},
+	"yapf.args": [
+		"--style",
+		"{BASED_ON_STYLE: Google, COLUMN_LIMIT: 300, INDENT_WIDTH: 4, USE_TABS: true}"
+	]
 }

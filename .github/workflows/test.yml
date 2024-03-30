@@ -15,11 +15,11 @@ concurrency:
 jobs:
 
   package:
+    name: Build and Check Package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build and Check Package
-        uses: hynek/build-and-inspect-python-package@v2
+      - uses: hynek/build-and-inspect-python-package@v2
 
   test:
     needs: [package]
