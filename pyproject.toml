@@ -27,7 +27,7 @@ description = 'pytest plugin for looping tests'
 readme = { file = "README.rst", content-type = "text/x-rst" }
 license.file = "LICENSE"
 keywords = ["pytest", "loop", "repeat", "rerun", "stress", "pytest-loop"]
-requires-python = ">=3.8"
+requires-python = ">=3.7"
 py_modules = ["src/pytest_loop/pytest_loop"]
 classifiers = [
 	"Development Status :: 5 - Production/Stable",
@@ -39,6 +39,7 @@ classifiers = [
 	"Operating System :: POSIX",
 	"Programming Language :: Python",
 	"Programming Language :: Python :: 3 :: Only",
+	"Programming Language :: Python :: 3.7",
 	"Programming Language :: Python :: 3.8",
 	"Programming Language :: Python :: 3.9",
 	"Programming Language :: Python :: 3.10",

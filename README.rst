@@ -28,8 +28,8 @@ Requirements
 ------------
 
 You will need the following prerequisites in order to use pytest-loop:
-- Python 3.8+ or PyPy
-- pytest 8 or newer
+- Python 3.7+ or PyPy
+- pytest 7 or newer
 
 Installation
 ------------
