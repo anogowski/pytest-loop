@@ -7,12 +7,16 @@
 import re
 import shutil
 import time
+import logging
+import warnings
+from unittest import TestCase
 
 # PyTest Imports
 import pytest
 from pluggy import HookspecMarker
 from _pytest.main import Session
 from _pytest.config import Config
+from pytest import FixtureRequest
 
 SECONDS_IN_HOUR: float = 3600
 SECONDS_IN_MINUTE: float = 60
@@ -24,8 +28,8 @@ class InvalidTimeParameterError(Exception):
 	pass
 
 
-def pytest_configure(config: Config):
-	config.addinivalue_line('markers', 'loop(n): run the given test function `n` times.')
+class UnexpectedError(Exception):
+	pass
 
 
 def pytest_addoption(parser):
@@ -70,6 +74,19 @@ def pytest_addoption(parser):
 	    help='The number of times to loop each test',
 	)
 
+	pytest_loop.addoption(
+	    '--loop-scope',
+	    action='store',
+	    default='function',
+	    type=str,
+	    choices=('function', 'class', 'module', 'session'),
+	    help='Scope for looping tests',
+	)
+
+
+def pytest_configure(config: Config):
+	config.addinivalue_line('markers', 'loop(n): run the given test function `n` times.')
+
 
 @hookspec(firstresult=True)
 def pytest_runtestloop(session: Session) -> bool:
@@ -85,14 +102,19 @@ def pytest_runtestloop(session: Session) -> bool:
 	start_time: float = time.time()
 	total_time: float = 0
 
-	iterations = session.config.option.loop
-	m = session.get_closest_marker('loop')
+	# iterations = session.config.option.loop
+	# m = session.get_closest_marker('loop')
 
-	if m is not None:
-		iterations = int(m.args[0])
+	marker = session.get_closest_marker('loop')
+	iterations = marker and marker.args[0] or session.config.option.loop
+
+	# if m is not None:
+	# 	iterations = int(m.args[0])
+	# 	for arg, index in m.args:
+	# 		logging.debug(f"{index}: {arg}")
+	# 		print(f"{index}: {arg}")
 
 	count: int = 0
-	pattern: str = ""
 
 	while total_time >= SHORTEST_AMOUNT_OF_TIME or count <= iterations:  # need to run at least one for normal tests
 		count += 1
@@ -109,7 +131,7 @@ def pytest_runtestloop(session: Session) -> bool:
 				item._nodeid = _set_nodeid(item._nodeid, pattern, run_str)
 
 			elif count < iterations:
-				pattern = " - run\[\d+ / d+\]"
+				pattern = " - run\[\d+ \/ \d+\]"
 				run_str: str = f" - run[{count} / {iterations}]"
 				item._nodeid = _set_nodeid(item._nodeid, pattern, run_str)
 
@@ -183,3 +205,35 @@ def _print_loop_count(count: int, iterations: int):
 	else:
 		print(f" Loop # {count} ".center(column_length, "="))
 	print("\n")
+
+
+@pytest.fixture()
+def __pytest_loop_step_number(request: FixtureRequest):
+	marker = request.node.get_closest_marker("loop")
+	count = marker and marker.args[0] or request.config.option.loop
+	if count > 1:
+		try:
+			return request.param
+		except AttributeError:
+			if issubclass(request.cls, TestCase):
+				warnings.warn("Repeating unittest class tests not supported")
+			else:
+				raise UnexpectedError("This call couldn't work with pytest-loop. "
+				                      "Please consider raising an issue with your usage.")
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_generate_tests(metafunc):
+	count = metafunc.config.option.loop
+	m = metafunc.definition.get_closest_marker('loop')
+
+	if m is not None:
+		count = int(m.args[0])
+	if count > 1:
+		metafunc.fixturenames.append("__pytest_loop_step_number")
+
+		def make_progress_id(i, n=count) -> str:
+			return f' {i+1} / {n} '
+
+		scope = metafunc.config.option.loop_scope
+		metafunc.parametrize('__pytest_loop_step_number', range(count), indirect=True, ids=make_progress_id, scope=scope)

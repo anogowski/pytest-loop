@@ -38,6 +38,8 @@
 		"{BASED_ON_STYLE: Google, COLUMN_LIMIT: 300, INDENT_WIDTH: 4, USE_TABS: true}"
 	],
 	"cSpell.words": [
+		"fixturenames",
+		"metafunc",
 		"nodeid"
 	]
 }
