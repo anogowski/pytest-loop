@@ -2,10 +2,14 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://www.mozilla.org/en-US/MPL/2.0/.
+
+# System Imports
+import re
 import shutil
 import time
+
+# PyTest Imports
 import pytest
-import re
 from pluggy import HookspecMarker
 from _pytest.main import Session
 from _pytest.config import Config
@@ -105,8 +109,8 @@ def pytest_runtestloop(session: Session) -> bool:
 				item._nodeid = _set_nodeid(item._nodeid, pattern, run_str)
 
 			elif count < iterations:
-				run_str: str = f" - run[{count}/{iterations}]"
-				pattern = " - run\[\d+/d+\]"
+				pattern = " - run\[\d+ / d+\]"
+				run_str: str = f" - run[{count} / {iterations}]"
 				item._nodeid = _set_nodeid(item._nodeid, pattern, run_str)
 
 			next_item: pytest.Item = session.items[index + 1] if index + 1 < len(session.items) else None

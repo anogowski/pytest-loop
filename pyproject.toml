@@ -48,16 +48,19 @@ classifiers = [
 	"Topic :: Software Development :: Testing",
 	"Topic :: Utilities",
 ]
+urls.Homepage = "https://github.com/anogowski/pytest-loop"
+urls.Repository = "https://github.com/anogowski/pytest-loop.git"
+urls.Issues = "https://github.com/anogowski/pytest-loop/issues"
+urls.Changelog = "https://github.com/anogowski/pytest-loop/blob/master/CHANGELOG.rst"
 
 dependencies = ["pytest"]
 
 project.optional-dependencies = ["tox"]
 
-[project.urls]
-Home = "https://github.com/anogowski/pytest-loop"
-Repository = "https://github.com/anogowski/pytest-loop.git"
-Issues = "https://github.com/anogowski/pytest-loop/issues"
-Changelog = "https://github.com/anogowski/pytest-loop/blob/master/CHANGELOG.rst"
-
 [project.entry-points.pytest11]
 loop = "pytest_loop"
+
+[tool.codespell]
+builtin = "clear,usage,en-GB_to_en-US"
+write-changes = true
+count = true
