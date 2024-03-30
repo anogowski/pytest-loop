@@ -84,7 +84,7 @@ def pytest_addoption(parser):
 	)
 
 
-@pytest.mark.trylast
+@pytest.hookimpl(trylast=True)
 def pytest_configure(config: Config):
 	config.addinivalue_line('markers', 'loop(n): run the given test function `n` times.')
 	config.pluginmanager.register(PyTest_Loop(config), PyTest_Loop.name)

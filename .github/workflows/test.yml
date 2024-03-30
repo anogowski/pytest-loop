@@ -80,12 +80,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pytest: ["4", "5", "6"]
+        pytest: ["6"]
         include:
-          - pytest: "4"
-            tox_env: "py37-pytest4"
-          - pytest: "5"
-            tox_env: "py37-pytest5"
           - pytest: "6"
             tox_env: "py37-pytest6"
 
