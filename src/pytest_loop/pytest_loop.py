@@ -80,12 +80,15 @@ def pytest_runtestloop(session: Session) -> bool:
 
 	start_time: float = time.time()
 	total_time: float = 0
-	count: int = 0
+
 	iterations = session.config.option.loop
 	m = session.get_closest_marker('loop')
 
 	if m is not None:
 		iterations = int(m.args[0])
+
+	count: int = 0
+	pattern: str = ""
 
 	while total_time >= SHORTEST_AMOUNT_OF_TIME or count <= iterations:  # need to run at least one for normal tests
 		count += 1
@@ -96,13 +99,15 @@ def pytest_runtestloop(session: Session) -> bool:
 			item: pytest.Item = item
 			item._report_sections.clear()  #clear reports for new test
 
-			if total_time > SHORTEST_AMOUNT_OF_TIME or count < iterations:
+			if total_time > SHORTEST_AMOUNT_OF_TIME:
 				pattern = " - run\[\d+\]"
-				if re.search(pattern, item._nodeid):
-					new_str = f" - run[{count}]"
-					item._nodeid = re.sub(pattern, new_str, item._nodeid)
-				else:
-					item._nodeid = item._nodeid + f" - run[{count}]"
+				run_str: str = f" - run[{count}]"
+				item._nodeid = _set_nodeid(item._nodeid, pattern, run_str)
+
+			elif count < iterations:
+				run_str: str = f" - run[{count}/{iterations}]"
+				pattern = " - run\[\d+/d+\]"
+				item._nodeid = _set_nodeid(item._nodeid, pattern, run_str)
 
 			next_item: pytest.Item = session.items[index + 1] if index + 1 < len(session.items) else None
 			item.config.hook.pytest_runtest_protocol(item=item, nextitem=next_item)
@@ -116,7 +121,15 @@ def pytest_runtestloop(session: Session) -> bool:
 	return True
 
 
-def _get_delay_time(session: Session):
+def _set_nodeid(nodeid: str, pattern: str, run_str: str) -> str:
+	if re.search(pattern, nodeid):
+		nodeid = re.sub(pattern, run_str, nodeid)
+	else:
+		nodeid = nodeid + run_str
+	return nodeid
+
+
+def _get_delay_time(session: Session) -> float:
 	"""
 	Helper function to extract the delay time from the session.
 
