@@ -32,7 +32,20 @@ authors = [{ name = "Adam Nogowski" }]
 description = 'pytest plugin for looping tests'
 readme = { file = "README.rst", content-type = "text/x-rst" }
 license.file = "LICENSE"
-keywords = ["pytest", "loop", "repeat", "rerun", "stress", "pytest-loop"]
+keywords = [
+	"pytest",
+	"loop",
+	"repeat",
+	"rerun",
+	"stress",
+	"duration",
+	"time",
+	"test",
+	"pytest-loop",
+	"pytest-repeat",
+	"pytest-rerun",
+	"pytest-stress",
+]
 requires-python = ">=3.7"
 py_modules = ["src/pytest_loop/pytest_loop"]
 classifiers = [

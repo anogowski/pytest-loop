@@ -7,7 +7,7 @@ import pytest
 pytest_plugins = "pytester",
 
 
-class TestLoop:
+class Test_Loop:
 
 	def test_no_loop(self, testdir):
 		testdir.makepyfile("""
@@ -67,12 +67,12 @@ class TestLoop:
         """)
 		result = testdir.runpytest('-v', '--loop', '2')
 		result.stdout.fnmatch_lines([
-		    '*test_parametrize.py::test_loop - run[1 / 6]  PASSED*',
-		    '*test_parametrize.py::test_loop - run[2 / 6]  PASSED*',
-		    '*test_parametrize.py::test_loop - run[3 / 6]  PASSED*',
-		    '*test_parametrize.py::test_loop - run[4 / 6]  PASSED*',
-		    '*test_parametrize.py::test_loop - run[5 / 6]  PASSED*',
-		    '*test_parametrize.py::test_loop - run[6 / 6]  PASSED*',
+		    '*test_parametrize.py::test_loop[ 1 / 6 ]  PASSED*',
+		    '*test_parametrize.py::test_loop[ 2 / 6 ]  PASSED*',
+		    '*test_parametrize.py::test_loop[ 3 / 6 ]  PASSED*',
+		    '*test_parametrize.py::test_loop[ 4 / 6 ]  PASSED*',
+		    '*test_parametrize.py::test_loop[ 5 / 6 ]  PASSED*',
+		    '*test_parametrize.py::test_loop[ 6 / 6 ]  PASSED*',
 		    '*6 passed*',
 		])
 		assert result.ret == 0
@@ -102,11 +102,11 @@ class TestLoop:
         """)
 		result = testdir.runpytest('-v', '--loop', '5')
 		result.stdout.fnmatch_lines([
-		    '*test_step_number.py::test_loop - run[1 / 5] PASSED*',
-		    '*test_step_number.py::test_loop - run[2 / 5] PASSED*',
-		    '*test_step_number.py::test_loop - run[3 / 5] PASSED*',
-		    '*test_step_number.py::test_loop - run[4 / 5] PASSED*',
-		    '*test_step_number.py::test_loop - run[5 / 5] PASSED*',
+		    '*test_step_number.py::test_loop[ 1 / 5 ] PASSED*',
+		    '*test_step_number.py::test_loop[ 2 / 5 ] PASSED*',
+		    '*test_step_number.py::test_loop[ 3 / 5 ] PASSED*',
+		    '*test_step_number.py::test_loop[ 4 / 5 ] PASSED*',
+		    '*test_step_number.py::test_loop[ 5 / 5 ] PASSED*',
 		    '*5 passed*',
 		])
 		assert result.ret == 0

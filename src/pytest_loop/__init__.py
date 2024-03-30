@@ -16,7 +16,7 @@ import pytest
 from pluggy import HookspecMarker
 from _pytest.main import Session
 from _pytest.config import Config
-from pytest import FixtureRequest, fixture
+from pytest import FixtureRequest
 
 SECONDS_IN_HOUR: float = 3600
 SECONDS_IN_MINUTE: float = 60
@@ -84,25 +84,16 @@ def pytest_addoption(parser):
 	)
 
 
-@pytest.mark.trylast
 def pytest_configure(config: Config):
 	config.addinivalue_line('markers', 'loop(n): run the given test function `n` times.')
-	config.pluginmanager.register(PyTest_Loop(config), PyTest_Loop.name)
 
 
 class PyTest_Loop:
-	name = 'pytest-loop'
-
-	def __init__(self, config: Config):
-		# turn debug prints on only if "-vv" or more passed
-		level = logging.DEBUG if config.option.verbose > 1 else logging.INFO
-		logging.basicConfig(level=level)
-		self.logger = logging.getLogger(self.name)
 
 	@hookspec(firstresult=True)
 	def pytest_runtestloop(self, session: Session) -> bool:
 		"""
-		Reimplement the test loop but loop for the user defined amount of time or iterations.
+		Reimplement the test loop but loop for the user defined amount of time.
 		"""
 		if session.testsfailed and not session.config.option.continue_on_collection_errors:
 			raise session.Interrupted("%d error%s during collection" % (session.testsfailed, "s" if session.testsfailed != 1 else ""))
@@ -111,7 +102,7 @@ class PyTest_Loop:
 			return True
 
 		start_time: float = time.time()
-		total_time: float = 0
+		total_time: float = self._get_total_time(session)
 
 		count: int = 0
 
@@ -136,10 +127,16 @@ class PyTest_Loop:
 			if self._timed_out(session, start_time):
 				break  # exit loop
 			time.sleep(self._get_delay_time(session))
-		self.logger.debug("end test loop")
 		return True
 
 	def _set_nodeid(self, nodeid: str, count: int) -> str:
+		"""
+		Helper function to set the loop count when using duration.
+
+		:param nodeid: Name of test function.
+		:param count: Current loop count.
+		:return: Formatted string for test name.
+		"""
 		pattern = "\[ \d+ \]"
 		run_str = f"[ {count} ]"
 		if re.search(pattern, nodeid):
@@ -169,7 +166,7 @@ class PyTest_Loop:
 		seconds = session.config.option.seconds
 		total_time = hours_in_seconds + minutes_in_seconds + seconds
 		if total_time < SHORTEST_AMOUNT_OF_TIME:
-			raise InvalidTimeParameterError("Total time cannot be less than: {}!".format(SHORTEST_AMOUNT_OF_TIME))
+			raise InvalidTimeParameterError(f"Total time cannot be less than: {SHORTEST_AMOUNT_OF_TIME}!")
 		return total_time
 
 	def _timed_out(self, session: Session, start_time: float) -> bool:
@@ -195,6 +192,12 @@ class PyTest_Loop:
 
 	@pytest.fixture()
 	def __pytest_loop_step_number(self, request: FixtureRequest):
+		"""
+		Fixture function to set step number for loop.
+
+		:param request: The number to print.
+		:return: request.param.
+		"""
 		marker = request.node.get_closest_marker("loop")
 		count = marker and marker.args[0] or request.config.option.loop
 		if count > 1:
@@ -209,7 +212,12 @@ class PyTest_Loop:
 
 	@pytest.hookimpl(trylast=True)
 	def pytest_generate_tests(self, metafunc):
-		self.logger.debug("start pytest_generate_tests")
+		"""
+		Hook function to create tests based on loop value.
+
+		:param metafunc: pytest metafunction
+		:return: None.
+		"""
 		count = metafunc.config.option.loop
 		m = metafunc.definition.get_closest_marker('loop')
 
