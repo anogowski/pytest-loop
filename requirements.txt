@@ -12,7 +12,7 @@ colorama==0.4.6
 cookiecutter==2.6.0
 distlib==0.3.9
 filelock==3.16.1
-h11==0.14.0
+h11==0.16.0
 hatch==1.13.0
 hatchling==1.25.0
 httpcore==1.0.6
@@ -62,8 +62,8 @@ trove-classifiers==2024.10.16
 types-python-dateutil==2.9.0.20241003
 urllib3==2.2.3
 userpath==1.9.2
-uv==0.4.23
+uv==0.11.6
 versioningit==3.1.2
-virtualenv==20.26.6
+virtualenv==20.36.1
 zipp==3.20.2
 zstandard==0.23.0
