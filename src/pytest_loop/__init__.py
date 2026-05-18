@@ -96,8 +96,8 @@ class PyTest_Loop:
 	def __init__(self, config: Config):
 		# turn debug prints on only if "-vv" or more passed
 		level = logging.DEBUG if config.option.verbose > 1 else logging.INFO
-		logging.basicConfig(level=level)
 		self.logger = logging.getLogger(self.name)
+		self.logger.setLevel(level)
 
 	@hookspec(firstresult=True)
 	def pytest_runtestloop(self, session: Session) -> bool:
